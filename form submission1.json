@@ -1,0 +1,200 @@
+{
+  "name": "form submission1",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Contact us",
+        "formDescription": "we'll get back to you shortly",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Name"
+            },
+            {
+              "fieldLabel": "Email",
+              "fieldType": "email"
+            },
+            {
+              "fieldLabel": "Message"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.5,
+      "position": [
+        0,
+        0
+      ],
+      "id": "59f026db-f2f7-4035-9a78-f8d37733863a",
+      "name": "On form submission",
+      "webhookId": "fbd4365f-8590-4d4e-8fed-c8a15e004b7a"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "https://docs.google.com/spreadsheets/d/1yZuDYBqc0aCds5CEMVia2juXBWUIe2z1LgTINCkqVsk/edit?gid=0#gid=0",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1yZuDYBqc0aCds5CEMVia2juXBWUIe2z1LgTINCkqVsk/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Name": "={{ $json.Name }}",
+            "Gmail": "={{ $json.Email }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Gmail",
+              "displayName": "Gmail",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        208,
+        0
+      ],
+      "id": "c276ca02-be0e-4b11-bcfd-9b5b9504d304",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "sJpswfPLucQBpmJv",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "=models/gemini-3-flash-preview",
+          "mode": "id"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=You are a professional customer support assistant. \nSomeone filled out a contact form with the following details:\n\nName: {{ $('On form submission').item.json.Name }}\nEmail: {{ $('On form submission').item.json.Email }}\nMessage: {{ $('On form submission').item.json.Message }}\n\nWrite a warm, professional and personalized email reply to this person addressing their message directly. Keep it under 100 words."
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1.2,
+      "position": [
+        416,
+        0
+      ],
+      "id": "a54dcc7c-cabf-42d1-ba5b-d92e9c24a2bb",
+      "name": "Message a model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "KA9n8WplUJI9UNbI",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('On form submission').item.json.Email }}",
+        "subject": "=Thank you for contacting us, {{ $('On form submission').item.json.Name }}!",
+        "message": "=",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        768,
+        0
+      ],
+      "id": "d2fb6dae-f64d-4f90-8cfc-75c47ae0adfb",
+      "name": "Send a message",
+      "webhookId": "03838e5d-634b-4e22-9860-d521045d853f",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "2JpRAMSVMnaqfvwy",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "b7d67848-35f6-4807-bb06-4589563362c9",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "9e0d5474d9a892a7930845b84299390b392a48358bcfd642370f031c098c1edd"
+  },
+  "id": "ZeNqjyusEYEW86iZ",
+  "tags": []
+}
