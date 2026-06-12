@@ -1,0 +1,130 @@
+{
+  "name": "My workflow 3",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Get a Free Consultation",
+        "formDescription": "Tell us about your project and budget",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Name"
+            },
+            {
+              "fieldLabel": "Email",
+              "fieldType": "email"
+            },
+            {
+              "fieldLabel": "Budget"
+            },
+            {
+              "fieldLabel": "Requirement"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.5,
+      "position": [
+        0,
+        0
+      ],
+      "id": "b71e1d80-8c0a-47a0-bc77-921053f36ddc",
+      "name": "On form submission",
+      "webhookId": "87310003-7418-45a3-b849-06552794f6f0"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-3-flash-preview",
+          "mode": "list",
+          "cachedResultName": "models/gemini-3-flash-preview"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=You are a sales expert. Analyze this lead and qualify them.\n\nName: {{ $('On form submission').item.json.Name }}\nBudget: {{ $('On form submission').item.json.Budget }}\nRequirement: {{ $('On form submission').item.json.Requirement }}\n\nBased on the budget and requirement, classify this lead as:\n- 🔥 Hot Lead (high budget, urgent need)\n- 🌡️ Warm Lead (medium budget, interested)\n- ❄️ Cold Lead (low budget, just browsing)\n\nRespond in this exact format:\nStatus: [Hot/Warm/Cold]\nReason: [One sentence explanation]\nAction: [What the sales team should do]"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1.2,
+      "position": [
+        208,
+        0
+      ],
+      "id": "f9bbcd18-25b5-471d-8dd1-6364a34e71a5",
+      "name": "Message a model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "KA9n8WplUJI9UNbI",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "6848919044",
+        "text": "=🚨 New Lead Alert!\n\n👤 Name: {{ $('On form submission').item.json.Name }}\n📧 Email: {{ $('On form submission').item.json.Email }}\n💰 Budget: {{ $('On form submission').item.json.Budget }}\n📋 Requirement: {{ $('On form submission').item.json.Requirement }}\n\n🤖 AI Analysis:\n{{ $('Message a model').item.json.content.parts[0].text }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        560,
+        0
+      ],
+      "id": "36d366dd-6373-41bd-bbe7-92b3506fbd96",
+      "name": "Send a text message",
+      "webhookId": "7c63335e-2a54-4d92-9ee5-2fcbb4e0e526",
+      "credentials": {
+        "telegramApi": {
+          "id": "60ALdD9VGjt23E5a",
+          "name": "Telegram account 2"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "50b63c06-cc49-42b3-a1c3-5076d973bd4f",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "9e0d5474d9a892a7930845b84299390b392a48358bcfd642370f031c098c1edd"
+  },
+  "id": "0xZJL5WFiplrPQvW",
+  "tags": []
+}
